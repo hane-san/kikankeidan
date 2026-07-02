@@ -1,0 +1,21 @@
+{
+  "name": "行政期間ミニ",
+  "short_name": "行政期間",
+  "description": "行政書士実務向けの期間計算プロトタイプ。行政不服審査法・行政手続法の期間条文を確認できます。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f2e9",
+  "theme_color": "#315e55",
+  "icons": [
+    {
+      "src": "calendar-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    },
+    {
+      "src": "calendar-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

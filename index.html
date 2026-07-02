@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#315e55">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="行政期間ミニ">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="calendar-icon.png">
+<title>行政期間ミニ｜期間計算プロトタイプ</title>
+<style>
+:root{
+  --bg:#f4f2e9; --paper:#fffdf6; --ink:#242827; --muted:#71746e; --line:#ddd8c8;
+  --accent:#315e55; --accent2:#d86e4a; --yellow:#fff0a8; --yellow2:#ffd95c;
+  --greenSoft:#e8f0eb; --orangeSoft:#fff1dc; --shadow:0 16px 42px rgba(35,45,39,.14);
+  --r:21px; --top: env(safe-area-inset-top); --bottom: env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden;background:
+  radial-gradient(circle at 12% 0%, rgba(255,230,125,.52), transparent 22rem),
+  radial-gradient(circle at 95% 14%, rgba(207,226,215,.65), transparent 20rem),
+  linear-gradient(155deg,#fbfaf4,#eeeadf 58%,#e7e7dc);
+  color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;}
+button,select,input{font:inherit}button{cursor:pointer}a{color:var(--accent);font-weight:800;text-decoration:none}
+.app{height:100svh;max-width:760px;margin:0 auto;padding:calc(10px + var(--top)) 10px calc(10px + var(--bottom));display:grid;grid-template-rows:auto auto 1fr auto;gap:8px}
+.topbar{display:flex;align-items:center;gap:10px;min-height:54px}
+.logo{width:48px;height:48px;border-radius:16px;box-shadow:0 8px 20px rgba(49,94,85,.22);background:#fff;flex:0 0 auto}
+.titleBox{min-width:0;flex:1}.eyebrow{font-size:10px;font-weight:900;color:var(--accent);letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.title{font-size:22px;line-height:1.05;font-weight:950;letter-spacing:-.05em}.mini{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconBtn{border:1px solid var(--line);background:rgba(255,253,246,.86);border-radius:15px;width:44px;height:44px;font-size:21px;box-shadow:0 6px 18px rgba(30,40,35,.08)}
+.controls{background:rgba(255,253,246,.92);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:10px;display:grid;gap:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row.one{grid-template-columns:1fr}.row.dateRow{grid-template-columns:1fr auto auto auto;align-items:end}.field label{display:block;font-size:10px;font-weight:900;color:#666b64;margin:0 0 4px 2px}.field select,.field input{width:100%;border:1px solid #d7d2c3;background:#fffdf8;border-radius:13px;padding:10px 10px;font-size:14px;color:var(--ink);height:42px;min-width:0}.pillBtn{border:0;border-radius:14px;background:#eef0eb;color:#303734;font-size:12px;font-weight:900;padding:0 10px;height:42px;min-width:42px}.pillBtn.primary{background:var(--accent);color:#fff}.pillBtn.warn{background:#fff2c6;color:#5b4300;border:1px solid #ead173}.toggle{display:flex;gap:7px;align-items:center;font-size:12px;color:#555;padding:0 3px}.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.content{min-height:0;display:grid;grid-template-rows:auto 1fr;gap:8px}.card{min-height:0;background:rgba(255,253,246,.94);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-rows:auto 1fr}.cardHead{padding:12px 13px 10px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#fffdf8,#f4f2ea)}.cardHead h1{margin:0 0 3px;font-size:17px;line-height:1.25;letter-spacing:-.03em}.meta{font-size:11px;color:var(--muted);line-height:1.4}.source{font-size:11px;color:var(--muted);line-height:1.4;margin-top:4px}.article{min-height:0;overflow:auto;padding:13px 14px 17px;font-size:14px;line-height:1.72;white-space:pre-wrap;overscroll-behavior:contain}.mark{display:inline;border:0;margin:0 .05em;padding:.04em .34em .12em;border-radius:.6em;background:linear-gradient(180deg,#fff7bf,#ffd962);border-bottom:2px solid #c7a641;color:#2b2400;font-weight:950;box-shadow:0 2px 0 rgba(80,60,0,.08);font-size:inherit}.mark:active{transform:translateY(1px)}
+.listBar{display:flex;gap:7px;align-items:center;justify-content:space-between;background:rgba(255,253,246,.9);border:1px solid var(--line);border-radius:17px;padding:8px 9px;font-size:12px;color:#565b55}.listBar b{font-size:13px}.smallBtn{border:0;background:#edf0ea;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;color:#303734}.smallBtn.accent{background:#e8f0eb;color:var(--accent)}
+.bottomNote{font-size:10.5px;color:#6d706a;line-height:1.42;padding:0 3px}.bottomNote b{color:#555}
+.sheet{position:fixed;inset:auto 10px calc(10px + var(--bottom)) 10px;max-width:760px;margin:0 auto;background:rgba(255,253,246,.98);border:1px solid var(--line);border-radius:24px;box-shadow:0 28px 70px rgba(20,25,20,.25);transform:translateY(calc(100% + 24px));transition:transform .22s ease;z-index:10;max-height:min(70svh,560px);display:grid;grid-template-rows:auto 1fr;overflow:hidden}.sheet.open{transform:translateY(0)}.sheetHead{padding:13px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.sheetTitle{font-weight:950}.items{overflow:auto;padding:10px}.item{border:1px solid #e3dece;border-radius:16px;background:#fffdf8;padding:10px 11px;margin-bottom:8px}.item b{font-size:13px}.item .muted{font-size:11px;line-height:1.45;margin-top:3px}.badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:999px;background:#e9f0eb;color:#315e55;font-weight:900;margin-left:4px}.badge.manual{background:#fff1dc;color:#87531d}.badge.mixed{background:#f0e8fb;color:#59407a}
+.backdrop{position:fixed;inset:0;background:rgba(18,20,18,.28);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:.2s;z-index:9}.backdrop.show{opacity:1;pointer-events:auto}
+dialog{border:0;border-radius:24px;padding:0;width:min(680px,calc(100vw - 22px));max-height:86svh;box-shadow:0 28px 90px rgba(0,0,0,.25);background:#fffdf7;color:var(--ink)}dialog::backdrop{background:rgba(20,23,20,.36);backdrop-filter:blur(4px)}.modalHead{padding:14px 16px 11px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#fffdf8,#f5f1e7)}.modalHead h2{margin:0 0 3px;font-size:19px;letter-spacing:-.03em}.modalBody{padding:13px 16px;overflow:auto}.modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.modalBody label{display:block;font-size:10px;font-weight:900;color:#646961;margin:0 0 4px 2px}.modalBody input{width:100%;border:1px solid #d7d2c3;background:#fffdf8;border-radius:13px;padding:10px;height:42px}.quick{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}.resultLine{margin-top:8px;padding:10px 12px;border-radius:16px;background:#f8f7ef;border:1px solid #e4decd;font-size:13px;line-height:1.55}.bigDate{font-size:24px;line-height:1.2;font-weight:950;letter-spacing:-.04em;color:#164137;margin-top:3px}.notice{margin-top:9px;padding:10px 12px;border-radius:15px;background:#fff4d7;border:1px solid #ead6a0;color:#5b4a1d;font-size:12px;line-height:1.55}.modalActions{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--line);background:#fbf7ec}
+.toast{position:fixed;left:50%;bottom:calc(20px + var(--bottom));transform:translate(-50%,20px);opacity:0;background:#26322e;color:#fff;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:800;box-shadow:0 16px 38px rgba(0,0,0,.22);transition:.22s;z-index:20}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-height:700px){.app{gap:6px;padding-top:calc(6px + var(--top));padding-bottom:calc(6px + var(--bottom))}.topbar{min-height:45px}.logo{width:42px;height:42px;border-radius:14px}.title{font-size:19px}.mini{display:none}.controls{padding:8px;gap:6px}.field select,.field input,.pillBtn{height:38px;padding-top:8px;padding-bottom:8px}.toggle{display:none}.cardHead{padding:10px 12px 8px}.article{font-size:13px;line-height:1.62;padding:11px 12px 14px}.bottomNote{display:none}}
+@media (max-width:380px){.row{grid-template-columns:1fr}.row.dateRow{grid-template-columns:1fr auto auto}.tomorrowHide{display:none}.modalGrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <img class="logo" src="calendar-icon.svg" alt="">
+    <div class="titleBox">
+      <div class="eyebrow">行政書士実務向け・期間計算</div>
+      <div class="title">行政期間ミニ</div>
+      <div class="mini">黄色マーカーを押すと、基準日からの満了日を表示</div>
+    </div>
+    <button class="iconBtn" id="helpBtn" aria-label="注意メモ">?</button>
+  </header>
+
+  <section class="controls" aria-label="条件選択">
+    <div class="row">
+      <div class="field"><label for="lawSelect">法令</label><select id="lawSelect"></select></div>
+      <div class="field"><label for="entrySelect">手続・条文</label><select id="entrySelect"></select></div>
+    </div>
+    <div class="row dateRow">
+      <div class="field"><label for="baseDate">基準日</label><input id="baseDate" type="date"></div>
+      <button class="pillBtn" id="yesterdayBtn">昨日</button>
+      <button class="pillBtn primary" id="todayBtn">今日</button>
+      <button class="pillBtn tomorrowHide" id="tomorrowBtn">明日</button>
+    </div>
+    <label class="toggle"><input id="weekendAdjust" type="checkbox" checked> 末日が土日の場合は、翌平日も参考表示</label>
+  </section>
+
+  <main class="content">
+    <div class="listBar">
+      <span><b id="countLabel">収録条文</b> <span id="kindLabel"></span></span>
+      <button class="smallBtn accent" id="openListBtn">一覧を開く</button>
+    </div>
+    <article class="card">
+      <div class="cardHead">
+        <h1 id="title"></h1>
+        <div class="meta" id="meta"></div>
+        <div class="source" id="source"></div>
+      </div>
+      <div class="article" id="article"></div>
+    </article>
+  </main>
+
+  <div class="bottomNote"><b>注意：</b>祝日・年末年始、個別法の特則、実際の教示・通知内容は未自動判定です。結果は確認補助として使ってください。</div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<section class="sheet" id="sheet" aria-label="条文一覧">
+  <div class="sheetHead"><div class="sheetTitle">収録した期間条文</div><button class="smallBtn" id="closeListBtn">閉じる</button></div>
+  <div class="items" id="periodList"></div>
+</section>
+
+<dialog id="dlg">
+  <div class="modalHead"><h2 id="modalTitle"></h2><div class="meta" id="modalSub"></div></div>
+  <div class="modalBody">
+    <div class="modalGrid">
+      <div><label>基準日</label><input id="modalDate" type="date"></div>
+      <div id="manualWrap" hidden><label>指定期間（日数）</label><input id="manualDays" type="number" min="1" step="1" value="14"></div>
+    </div>
+    <div class="quick">
+      <button class="pillBtn" id="modalYesterday">昨日</button><button class="pillBtn primary" id="modalToday">今日</button><button class="pillBtn" id="modalTomorrow">明日</button>
+    </div>
+    <div id="result"></div>
+    <div class="notice" id="modalNote"></div>
+  </div>
+  <div class="modalActions"><button class="pillBtn" id="copyBtn">結果コピー</button><button class="pillBtn primary" id="closeBtn">閉じる</button></div>
+</dialog>
+<div class="toast" id="toast">コピーしました</div>
+<script>
+const laws={
+ fufuku:{name:"行政不服審査法",lawId:"426AC0000000068",lawNo:"平成二十六年法律第六十八号",url:"https://laws.e-gov.go.jp/law/426AC0000000068"},
+ tetsuzuki:{name:"行政手続法",lawId:"405AC0000000088",lawNo:"平成五年法律第八十八号",url:"https://laws.e-gov.go.jp/law/405AC0000000088"}
+};
+const minpo={name:"民法",article:"第百三十八条〜第百四十三条",url:"https://laws.e-gov.go.jp/law/129AC0000000089"};
+const entries=[
+{id:"f18",law:"fufuku",article:"18",caption:"第十八条",short:"審査請求期間",kind:"fixed",title:"審査請求期間：処分を知った日／処分日",text:`処分についての審査請求は、処分があったことを知った日の翌日から起算して [[d:f18-3m:三月]]（当該処分について再調査の請求をしたときは、当該再調査の請求についての決定があったことを知った日の翌日から起算して [[d:f18-1m:一月]]）を経過したときは、することができない。ただし、正当な理由があるときは、この限りでない。
+
+２　処分についての審査請求は、処分（当該処分について再調査の請求をしたときは、当該再調査の請求についての決定）があった日の翌日から起算して [[d:f18-1y:一年]] を経過したときは、することができない。ただし、正当な理由があるときは、この限りでない。
+
+３　不作為についての審査請求は、当該不作為が継続している間は、することができる。`},
+{id:"f54",law:"fufuku",article:"54",caption:"第五十四条",short:"再調査請求期間",kind:"fixed",title:"再調査の請求期間：処分を知った日／処分日",text:`再調査の請求は、処分があったことを知った日の翌日から起算して [[d:f54-3m:三月]] を経過したときは、することができない。ただし、正当な理由があるときは、この限りでない。
+
+２　再調査の請求は、処分があった日の翌日から起算して [[d:f54-1y:一年]] を経過したときは、することができない。ただし、正当な理由があるときは、この限りでない。`},
+{id:"f57",law:"fufuku",article:"57",caption:"第五十七条",short:"三月後の教示",kind:"fixed",title:"三月後の教示：再調査請求が係属したままの場合",text:`処分庁は、再調査の請求がされた日（補正命令がある場合には、当該不備が補正された日）の翌日から起算して [[d:f57-3m:三月]] を経過しても当該再調査の請求が係属しているときは、遅滞なく、当該処分について直ちに審査請求をすることができる旨を書面でその再調査の請求人に教示しなければならない。`},
+{id:"f62",law:"fufuku",article:"62",caption:"第六十二条",short:"再審査請求期間",kind:"fixed",title:"再審査請求期間：原裁決を知った日／原裁決日",text:`再審査請求は、原裁決があったことを知った日の翌日から起算して [[d:f62-1m:一月]] を経過したときは、することができない。ただし、正当な理由があるときは、この限りでない。
+
+２　再審査請求は、原裁決があった日の翌日から起算して [[d:f62-1y:一年]] を経過したときは、することができない。ただし、正当な理由があるときは、この限りでない。`},
+{id:"f16",law:"fufuku",article:"16",caption:"第十六条",short:"標準審理期間",kind:"manual",title:"標準審理期間：審査請求から裁決までの目安",text:`審査庁となるべき行政庁は、審査請求がその事務所に到達してから当該審査請求に対する裁決をするまでに通常要すべき [[d:manual-standard-review:標準審理期間]] を定めるよう努めるとともに、これを定めたときは、適当な方法により公にしておかなければならない。`},
+{id:"f23",law:"fufuku",article:"23",caption:"第二十三条",short:"審査請求書の補正",kind:"manual",title:"補正命令：審査請求書の不備補正",text:`審査請求書に不備がある場合には、審査庁は、[[d:manual-correction-review:相当の期間]] を定め、その期間内に不備を補正すべきことを命じる場面があります。`},
+{id:"t6",law:"tetsuzuki",article:"6",caption:"第六条",short:"標準処理期間",kind:"manual",title:"標準処理期間：申請到達から処分までの目安",text:`行政庁は、申請がその事務所に到達してから当該申請に対する処分をするまでに通常要すべき [[d:manual-standard-process:標準処理期間]] を定めるよう努めるとともに、これを定めたときは、公にしておかなければならない。`},
+{id:"t7",law:"tetsuzuki",article:"7",caption:"第七条",short:"申請補正",kind:"manual",title:"申請の補正：形式不備がある場合",text:`行政庁は、申請が到達したときは遅滞なく審査を開始し、形式上の要件に適合しない申請については、速やかに、申請者に対し [[d:manual-correction-application:相当の期間]] を定めて補正を求め、又は拒否処分をしなければならない場面があります。`},
+{id:"t15",law:"tetsuzuki",article:"15",caption:"第十五条",short:"聴聞通知",kind:"mixed",title:"聴聞通知：相当期間＋公示送達型の二週間",text:`行政庁は、聴聞を行うに当たっては、聴聞の期日までに [[d:manual-hearing-notice:相当な期間]] をおいて、当該不利益処分の名あて人となるべき者に対し、所定事項を書面により通知しなければならない。
+
+所在が判明しない場合の公示による通知では、掲示を始めた日から [[d:t15-2w:二週間]] を経過したときに、当該通知が到達したものとみなされます。`},
+{id:"t22",law:"tetsuzuki",article:"22",caption:"第二十二条",short:"続行期日",kind:"mixed",title:"続行期日・再開期日：通知と公示型のみなし到達",text:`主宰者は、聴聞の期日における審理の結果、なお審理を続行する必要があると認めるときは、さらに新たな期日を定めることができます。
+
+当事者又は参加人の所在が判明しない場合には、第十五条第三項の公示通知の方法が準用され、原則として掲示を始めた日から [[d:t22-2w:二週間]] を経過したときに通知到達とみなされます。二回目以降の通知では、掲示を始めた日の [[d:t22-nextday:翌日]] という読替えが問題になります。`},
+{id:"t30",law:"tetsuzuki",article:"30",caption:"第三十条",short:"弁明の機会",kind:"manual",title:"弁明の機会の付与：弁明書提出期限までの相当期間",text:`行政庁は、弁明書の提出期限（口頭による弁明の機会の付与を行う場合には、その日時）までに [[d:manual-explanation:相当な期間]] をおいて、不利益処分の名あて人となるべき者に対し、所定事項を書面により通知しなければなりません。`},
+{id:"t39",law:"tetsuzuki",article:"39",caption:"第三十九条",short:"意見公募手続",kind:"fixed",title:"意見公募手続：意見提出期間は三十日以上",text:`命令等制定機関は、命令等を定めようとする場合には、案及び関連資料をあらかじめ公示し、意見提出期間を定めて広く一般の意見を求めなければなりません。
+
+第一項の規定により定める意見提出期間は、同項の公示の日から起算して [[d:t39-30d:三十日以上]] でなければなりません。`}
+];
+const defs={
+"f18-3m":{label:"審査請求｜知った日から三月",unit:"month",amount:3,rule:"next",result:"審査請求が原則できる最終日",note:"処分があったことを知った日が基準です。"},
+"f18-1m":{label:"再調査決定後の審査請求｜一月",unit:"month",amount:1,rule:"next",result:"審査請求が原則できる最終日",note:"再調査請求についての決定を知った日が基準です。"},
+"f18-1y":{label:"審査請求｜処分日から一年",unit:"year",amount:1,rule:"next",result:"客観的期間の最終日",note:"知った時期とは別に進む客観的期間です。"},
+"f54-3m":{label:"再調査の請求｜知った日から三月",unit:"month",amount:3,rule:"next",result:"再調査の請求が原則できる最終日",note:"処分があったことを知った日が基準です。"},
+"f54-1y":{label:"再調査の請求｜処分日から一年",unit:"year",amount:1,rule:"next",result:"客観的期間の最終日",note:"処分日から進む客観的期間です。"},
+"f57-3m":{label:"三月後の教示｜再調査請求係属",unit:"month",amount:3,rule:"next",result:"三月経過の確認日",note:"再調査請求日、補正がある場合は補正日を基準にします。"},
+"f62-1m":{label:"再審査請求｜原裁決を知った日から一月",unit:"month",amount:1,rule:"next",result:"再審査請求が原則できる最終日",note:"原裁決があったことを知った日が基準です。"},
+"f62-1y":{label:"再審査請求｜原裁決日から一年",unit:"year",amount:1,rule:"next",result:"客観的期間の最終日",note:"原裁決日から進む客観的期間です。"},
+"t15-2w":{label:"聴聞通知｜公示から二週間",unit:"day",amount:14,rule:"elapsed",result:"通知到達みなし日の目安",note:"締切ではなく、通知到達のみなし時点の確認です。"},
+"t22-2w":{label:"続行期日通知｜公示から二週間",unit:"day",amount:14,rule:"elapsed",result:"通知到達みなし日の目安",note:"所在不明の場合の公示通知です。"},
+"t22-nextday":{label:"続行期日通知｜二回目以降の翌日",unit:"day",amount:1,rule:"elapsed",result:"通知到達みなし日の目安",note:"二回目以降の通知に関する読替えです。"},
+"t39-30d":{label:"意見提出期間｜三十日以上",unit:"day",amount:30,rule:"include",result:"最低限確保すべき最終日の目安",note:"“以上”なので最低期間の目安です。実際の受付締切日時は各案件の公示を優先してください。"},
+"manual-standard-review":{label:"標準審理期間",unit:"manual",rule:"next",result:"入力日数による目安日",note:"行政庁が公表する標準審理期間の日数を入力してください。"},
+"manual-correction-review":{label:"補正命令の相当期間",unit:"manual",rule:"next",result:"入力日数による補正期限の目安",note:"命令で指定された日数・期限を優先してください。"},
+"manual-standard-process":{label:"標準処理期間",unit:"manual",rule:"next",result:"入力日数による処理目安日",note:"行政庁・手続ごとの標準処理期間を入れて使う想定です。"},
+"manual-correction-application":{label:"申請補正の相当期間",unit:"manual",rule:"next",result:"入力日数による補正期限の目安",note:"補正通知で指定された日付・日数を優先してください。"},
+"manual-hearing-notice":{label:"聴聞通知の相当な期間",unit:"manual",rule:"next",result:"入力日数による通知余裕期間の目安",note:"個別法で一週間前等の特則がある場合があります。"},
+"manual-explanation":{label:"弁明通知の相当な期間",unit:"manual",rule:"next",result:"入力日数による通知余裕期間の目安",note:"弁明書提出期限・口頭弁明日時は通知内容を優先してください。"}
+};
+let current=entries[0],currentDef=null;
+const $=id=>document.getElementById(id);
+const lawSelect=$("lawSelect"),entrySelect=$("entrySelect"),baseDate=$("baseDate"),todayBtn=$("todayBtn"),yesterdayBtn=$("yesterdayBtn"),tomorrowBtn=$("tomorrowBtn"),weekendAdjust=$("weekendAdjust"),title=$("title"),meta=$("meta"),source=$("source"),article=$("article"),periodList=$("periodList"),dlg=$("dlg"),modalTitle=$("modalTitle"),modalSub=$("modalSub"),modalDate=$("modalDate"),manualWrap=$("manualWrap"),manualDays=$("manualDays"),modalYesterday=$("modalYesterday"),modalToday=$("modalToday"),modalTomorrow=$("modalTomorrow"),result=$("result"),modalNote=$("modalNote"),copyBtn=$("copyBtn"),closeBtn=$("closeBtn"),openListBtn=$("openListBtn"),closeListBtn=$("closeListBtn"),sheet=$("sheet"),backdrop=$("backdrop"),helpBtn=$("helpBtn"),toast=$("toast"),countLabel=$("countLabel"),kindLabel=$("kindLabel");
+function pad(n){return String(n).padStart(2,"0")}function toISO(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}function parseISO(s){let [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}function today(){let d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}function addDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}function dim(y,m){return new Date(y,m+1,0).getDate()}function addMonths(d,n){let y=d.getFullYear(),m=d.getMonth()+n,day=d.getDate(),ty=y+Math.floor(m/12),tm=((m%12)+12)%12;return new Date(ty,tm,Math.min(day,dim(ty,tm)))}function addYears(d,n){let y=d.getFullYear()+n,m=d.getMonth(),day=d.getDate();return new Date(y,m,Math.min(day,dim(y,m)))}function wd(d){return ["日","月","火","水","木","金","土"][d.getDay()]}function fmt(d){return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wd(d)}）`}function wAdj(d){return d.getDay()==6?addDays(d,2):d.getDay()==0?addDays(d,1):d}function esc(s){return s.replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]))}function mark(s){return esc(s).replace(/\[\[d:([^:]+):([^\]]+)\]\]/g,(_,id,label)=>`<button class="mark" data-d="${id}">${label}</button>`)}
+function setup(){lawSelect.innerHTML=Object.entries(laws).map(([k,l])=>`<option value="${k}">${l.name}</option>`).join("");baseDate.value=toISO(today());modalDate.value=baseDate.value;lawSelect.onchange=()=>{fill();render()};entrySelect.onchange=render;baseDate.onchange=()=>modalDate.value=baseDate.value;todayBtn.onclick=()=>setBase(today());yesterdayBtn.onclick=()=>setBase(addDays(today(),-1));tomorrowBtn.onclick=()=>setBase(addDays(today(),1));modalToday.onclick=()=>{modalDate.value=toISO(today());calc()};modalYesterday.onclick=()=>{modalDate.value=toISO(addDays(today(),-1));calc()};modalTomorrow.onclick=()=>{modalDate.value=toISO(addDays(today(),1));calc()};modalDate.onchange=calc;manualDays.oninput=calc;weekendAdjust.onchange=calc;closeBtn.onclick=()=>dlg.close();copyBtn.onclick=copy;document.onclick=e=>{let m=e.target.closest(".mark");if(m)openCalc(m.dataset.d)};openListBtn.onclick=openSheet;closeListBtn.onclick=closeSheet;backdrop.onclick=closeSheet;helpBtn.onclick=showHelp;fill();render()}
+function setBase(d){baseDate.value=toISO(d);modalDate.value=baseDate.value}function fill(){let f=entries.filter(e=>e.law===lawSelect.value);entrySelect.innerHTML=f.map(e=>`<option value="${e.id}">${e.caption}｜${e.short}</option>`).join("")}function render(){current=entries.find(e=>e.id===entrySelect.value)||entries.find(e=>e.law===lawSelect.value)||entries[0];entrySelect.value=current.id;let l=laws[current.law];title.textContent=current.title;meta.textContent=`${l.name}（${l.lawNo}） ${current.caption}`;source.innerHTML=`参照元：<a href="${l.url}" target="_blank" rel="noopener">e-Gov 法令検索</a> ／ 期間計算一般：<a href="${minpo.url}" target="_blank" rel="noopener">民法 ${minpo.article}</a>`;article.innerHTML=mark(current.text);renderList();let f=entries.filter(e=>e.law===lawSelect.value);countLabel.textContent=`${l.name}：${f.length}件`;kindLabel.textContent=current.kind==="fixed"?"固定期間":current.kind==="manual"?"入力式":"混合"}
+function renderList(){let f=entries.filter(e=>e.law===lawSelect.value);periodList.innerHTML=f.map(e=>{let ms=[...e.text.matchAll(/\[\[d:([^:]+):([^\]]+)\]\]/g)].map(m=>m[2]);let type=e.kind==="fixed"?"固定":e.kind==="manual"?"入力":"混合";return `<div class="item" data-id="${e.id}"><b>${e.caption}｜${e.short}</b><span class="badge ${e.kind}">${type}</span><div class="muted">${e.title}<br>${ms.join("・")}</div></div>`}).join("");document.querySelectorAll(".item").forEach(x=>x.onclick=()=>{entrySelect.value=x.dataset.id;render();closeSheet()})}
+function openSheet(){sheet.classList.add("open");backdrop.classList.add("show")}function closeSheet(){sheet.classList.remove("open");backdrop.classList.remove("show")}
+function openCalc(id){currentDef=defs[id];if(!currentDef)return;modalTitle.textContent=currentDef.label;modalSub.textContent=`${laws[current.law].name} ${current.caption}`;modalDate.value=baseDate.value||toISO(today());manualWrap.hidden=currentDef.unit!=="manual";calc();dlg.showModal?dlg.showModal():alert(result.innerText)}
+function due(base,def){let amount=def.unit==="manual"?Math.max(1,Number(manualDays.value||1)):def.amount,start,finish,rule;if(def.rule==="next"){start=addDays(base,1);rule="翌日から起算";finish=def.unit==="month"?addMonths(base,amount):def.unit==="year"?addYears(base,amount):addDays(base,amount)}else if(def.rule==="include"){start=base;rule="当日を1日目として計算（公示日から起算の最低期間モード）";finish=addDays(base,amount-1)}else{start=base;rule="基準日から所定期間を経過する日を表示";finish=addDays(base,amount)}return{base,start,finish,amount,rule}}
+function calc(){if(!currentDef||!modalDate.value)return;let r=due(parseISO(modalDate.value),currentDef),adj=wAdj(r.finish),amount=currentDef.unit==="manual"?`${r.amount}日`:currentDef.unit==="month"?`${r.amount}か月`:currentDef.unit==="year"?`${r.amount}年`:`${r.amount}日`;let startLine=(currentDef.rule==="elapsed"||currentDef.rule==="include")?`基準日：${fmt(r.base)}`:`起算日：${fmt(r.start)}`;let html=`<div class="resultLine"><div class="meta">${currentDef.result}</div><div class="bigDate">${fmt(r.finish)}</div></div><div class="resultLine"><b>計算条件</b><br>基準日：${fmt(r.base)}<br>${startLine}<br>期間：${amount}<br>ルール：${r.rule}</div>`;if(weekendAdjust.checked&&toISO(adj)!==toISO(r.finish))html+=`<div class="resultLine"><b>土日補正の参考</b><br>翌平日参考：<b>${fmt(adj)}</b><br><span class="meta">祝日・年末年始は未対応です。</span></div>`;result.innerHTML=html;modalNote.textContent=currentDef.note+" 計算結果は確認補助です。個別事件では、教示内容・閉庁日・祝日・個別法の特則を必ず確認してください。"}
+async function copy(){let t=`${modalTitle.textContent}\n${modalSub.textContent}\n${result.innerText}\n${modalNote.textContent}`;try{await navigator.clipboard.writeText(t);showToast("コピーしました")}catch(e){alert(t)}}function showToast(msg){toast.textContent=msg;toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1300)}
+function showHelp(){currentDef={label:"注意メモ",unit:"manual",rule:"next",result:"",note:""};modalTitle.textContent="このプロトタイプの注意";modalSub.textContent="行政期間ミニ";manualWrap.hidden=true;modalDate.value=baseDate.value;result.innerHTML=`<div class="resultLine">このHTMLは、行政不服審査法・行政手続法に出てくる期間条文を、実務メモとして素早く確認するための試作です。</div><div class="resultLine"><b>未対応</b><br>祝日、年末年始、閉庁日、個別法の特則、電子申請の受付時刻、実際の教示文の差異。</div><div class="resultLine"><b>根拠確認</b><br>条文は e-Gov 法令検索へのリンクから確認してください。期間計算の一般ルールは民法第百三十八条〜第百四十三条を参照します。</div>`;modalNote.textContent="最終判断は必ず現行条文・通知・教示・行政庁の運用で確認してください。";dlg.showModal?dlg.showModal():alert(result.innerText)}
+setup();
+</script>
+</body>
+</html>
